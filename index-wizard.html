@@ -1606,7 +1606,7 @@
       <div class="res-card">
         <div class="rc-label">Rest Time</div>
         <div class="rc-value" id="rc-rest">—</div>
-        <div class="rc-unit">min</div>
+        <div class="rc-unit" id="rc-rest-unit">min</div>
       </div>
     </div>
 
@@ -2261,6 +2261,15 @@
     }, 80);
   }
 
+  /* ── TIME FORMATTER ─────────────────────────────────────────────────────── */
+  function fmtMin(m) {
+    m = Math.round(m);
+    if (m < 60) return m + ' min';
+    const h   = Math.floor(m / 60);
+    const rem = m % 60;
+    return rem ? h + 'h ' + rem + 'min' : h + 'h';
+  }
+
   /* ── STEP 4: Results ─────────────────────────────────────────────────────── */
   function buildResults() {
     const proteinId = sel.protein;
@@ -2289,14 +2298,12 @@
     loadDishPhoto(proteinId, cutId, donenessId, weightKg);
 
     // Cards
-    const isSlow = dObj.isSlow;
-    const cookDisplay = isSlow ? (cookMin/60).toFixed(1) : cookMin;
-    const cookUnit    = isSlow ? `hrs (${Math.floor(cookMin/60)}h ${cookMin%60>0?cookMin%60+'min':''})` : 'minutes';
-    document.getElementById('rc-cook').textContent     = cookDisplay;
-    document.getElementById('rc-cook-unit').textContent= cookUnit;
+    document.getElementById('rc-cook').textContent     = fmtMin(cookMin);
+    document.getElementById('rc-cook-unit').textContent= '';
     document.getElementById('rc-temp').textContent     = ovenC||'🔥';
     document.getElementById('rc-temp-unit').textContent= ovenC ? `°C (${cToF(ovenC)}°F)` : 'Hot Pan';
-    document.getElementById('rc-rest').textContent     = restMin;
+    document.getElementById('rc-rest').textContent     = fmtMin(restMin);
+    document.getElementById('rc-rest-unit').textContent= '';
 
     // Carry-over
     const cowBox = document.getElementById('cow-box');
@@ -2332,21 +2339,21 @@
 
   /* ── STEP GENERATOR (condensed) ──────────────────────────────────────────── */
   function buildSteps(cut, cookMin, ovenC, restMin, donenessId, targetC) {
-    const steps=[]; const m=cut.method; const hrs=(cookMin/60).toFixed(1); const pullC=targetC-4;
+    const steps=[]; const m=cut.method; const pullC=targetC-4;
     if(donenessId==='fall-off-bone'){
       if(cut.isRibs){
         steps.push('Remove silverskin from bone-side; apply dry rub, rest 30 min');
         steps.push(`Preheat oven to ${ovenC}°C`);
-        steps.push(`Wrap tightly in 2 layers of foil. Slow-roast ${cookMin} min (~${hrs} hrs)`);
+        steps.push(`Wrap tightly in 2 layers of foil. Slow-roast ${fmtMin(cookMin)}`);
         steps.push('Unwrap; glaze with BBQ sauce, return uncovered 15–20 min');
-        steps.push(`Rest loosely tented ${restMin} min`);
+        steps.push(`Rest loosely tented ${fmtMin(restMin)}`);
       } else {
         steps.push('Bring meat to room temperature (30–60 min)');
         steps.push(`Preheat oven to ${ovenC}°C (low & slow)`);
         steps.push('Season generously; sear all sides (optional). Place in sealed Dutch oven or double-foil with aromatics');
-        steps.push(`Slow-roast ${cookMin} min (~${hrs} hrs)`);
-        steps.push(`Check at ${Math.round(cookMin*0.85)} min — should pull apart with two forks`);
-        steps.push(`Rest covered ${restMin} min`);
+        steps.push(`Slow-roast ${fmtMin(cookMin)}`);
+        steps.push(`Check at ${fmtMin(Math.round(cookMin*0.85))} — should pull apart with two forks`);
+        steps.push(`Rest covered ${fmtMin(restMin)}`);
       }
       return steps;
     }
@@ -2358,34 +2365,34 @@
         steps.push('Unwrap, glaze with BBQ sauce for final 20 min');
       } else {
         const stall=Math.round(cookMin*0.55);
-        steps.push(`Smoke uncovered ${stall} min — bark will form. Expect a temp stall at 65–70°C (normal)`);
-        steps.push(`Wrap in foil; continue remaining ~${cookMin-stall} min until probe reads ${targetC}°C`);
+        steps.push(`Smoke uncovered ${fmtMin(stall)} — bark will form. Expect a temp stall at 65–70°C (normal)`);
+        steps.push(`Wrap in foil; continue remaining ~${fmtMin(cookMin-stall)} until probe reads ${targetC}°C`);
       }
-      steps.push(`Rest wrapped in towels in a cooler ${restMin} min`);
+      steps.push(`Rest wrapped in towels in a cooler ${fmtMin(restMin)}`);
       return steps;
     }
     if(m==='pan-sear'){
       steps.push('Preheat dry pan to high heat (no oil)');
       steps.push(`Sear ${Math.round(cut.C/2)} min each side`);
-      steps.push(`Finish in ${ovenC}°C oven ~${Math.max(1,cookMin-cut.C)} min`);
+      steps.push(`Finish in ${ovenC}°C oven ~${fmtMin(Math.max(1,cookMin-cut.C))}`);
       steps.push(`Pull at internal temp ${pullC}°C (carry-over will reach ${targetC}°C)`);
     } else if(m==='oven-slow'){
       steps.push(`Preheat oven to ${ovenC}°C`);
       steps.push('Season; seal in Dutch oven or tight foil');
-      steps.push(`Slow-roast ${cookMin} min (~${hrs} hrs)`);
+      steps.push(`Slow-roast ${fmtMin(cookMin)}`);
       steps.push(`Target internal temp: ${targetC}°C`);
     } else if(m==='oven-whole'){
       steps.push(`Preheat oven to ${ovenC}°C`);
       steps.push('Pat dry; truss and season inside and out');
-      steps.push(`Roast ${cookMin} min, baste halfway`);
+      steps.push(`Roast ${fmtMin(cookMin)}, baste halfway`);
       steps.push(`Probe thickest part of thigh — target ${targetC}°C`);
     } else {
       steps.push(`Preheat oven to ${ovenC}°C`);
       steps.push('Season and place on rack or lined tray');
-      steps.push(`Roast ${cookMin} min (check at ${cookMin-10} min)`);
+      steps.push(`Roast ${fmtMin(cookMin)} (check at ${fmtMin(cookMin-10)})`);
       steps.push(cut.isFish ? `Fish is done when flesh flakes and reaches ${targetC}°C (${cToF(targetC)}°F)` : `Pull at ${pullC}°C — carry-over finishes to ${targetC}°C`);
     }
-    steps.push(`Rest ${restMin} min before carving`);
+    steps.push(`Rest ${fmtMin(restMin)} before carving`);
     return steps;
   }
 
@@ -2396,7 +2403,7 @@
     const rest = document.getElementById('rc-rest').textContent;
     const summ = document.getElementById('result-summary-text').textContent;
     const steps= [...document.querySelectorAll('.res-step-text')].map((el,i)=>`${i+1}. ${el.textContent}`).join('\n');
-    const text = `PrimeTime Result\n${summ}\n\nCook Time: ${cook}\nOven Temp: ${temp}°C\nRest Time: ${rest} min\n\nSteps:\n${steps}`;
+    const text = `PrimeTime Result\n${summ}\n\nCook Time: ${cook}\nOven Temp: ${temp}°C\nRest Time: ${rest}\n\nSteps:\n${steps}`;
     navigator.clipboard.writeText(text).then(()=>{
       // Find the copy button by its onclick attribute text
       const btns = [...document.querySelectorAll('.btn-restart-inline')];
