@@ -37,7 +37,6 @@
 
     /* ── Header ─────────────────────────────────────────────────────────────── */
     .app-header {
-      direction: ltr;
       background: var(--red);
       padding: 14px 24px;
       display: flex; align-items: center; justify-content: space-between;
@@ -221,7 +220,7 @@
       z-index: 80; background: var(--card);
       border: 2px solid var(--line); border-radius: var(--radius);
       box-shadow: 0 8px 32px rgba(44,62,80,0.14);
-      overflow: hidden; direction: ltr;
+      overflow: hidden;
     }
     .pd-item {
       display: flex; align-items: center; gap: 10px;
@@ -1494,14 +1493,11 @@
 
 <!-- ── Header ──────────────────────────────────────────────────────────────── -->
 <header class="app-header">
-  <div class="header-logo">PrimeTime <span id="header-tagline">Precision Meat Calculator</span></div>
-  <div style="display:flex;gap:8px;align-items:center">
-    <button class="lang-toggle" id="lang-toggle-btn" onclick="toggleLang()" title="Switch language">HE</button>
-    <button class="header-key-btn" id="header-key-btn" onclick="toggleKeyBar()" title="Set Gemini API key">
-      <span class="key-dot" id="key-dot"></span>
-      <span id="header-key-label">Gemini Key</span>
-    </button>
-  </div>
+  <div class="header-logo">PrimeTime <span>Precision Meat Calculator</span></div>
+  <button class="header-key-btn" onclick="toggleKeyBar()" title="Set Gemini API key">
+    <span class="key-dot" id="key-dot"></span>
+    Gemini Key
+  </button>
 </header>
 <div class="key-bar" id="key-bar">
   <label>Gemini API Key</label>
@@ -1979,126 +1975,6 @@
 
   /* ── HELPERS ─────────────────────────────────────────────────────────────── */
   const KG_TO_LB = 2.20462;
-  /* ── INTERNATIONALISATION ────────────────────────────────────────────────── */
-  let currentLang = 'en';
-
-  const STRINGS = {
-    en: {
-      tagline:       'Precision Meat Calculator',
-      geminiKey:     'Gemini Key',
-      geminiApiKey:  'Gemini API Key',
-      save:          'Save',
-      checking:      'Checking…',
-      protein:       'Protein',
-      selectProtein: 'Select a protein…',
-      selectCut:     'Select a cut…',
-      chooseCut:     n => `Choose your ${n} cut`,
-      cutsAvail:     n => `${n} cuts available`,
-      weightDoneness:'Weight & Doneness',
-      weighYour:     n => `Weigh your <strong>${n}</strong> and choose doneness`,
-      donenessLabel: 'Doneness',
-      calculate:     'Calculate Cook Time →',
-      yourCook:      'Your cook',
-      cookTime:      'Cook Time',
-      ovenTemp:      'Oven Temp',
-      restTime:      'Rest Time',
-      stepsLabel:    'Step-by-step guide',
-      startOver:     '↺ Start Over',
-      copyResults:   '⎘ Copy Results',
-      cached:        '📁 cached',
-      savePhoto:     '⬇ Save photo',
-      hotPan:        'Hot Pan',
-      targetTemp:    (tc,tf) => `Target internal temp: <strong>${tc}°C (${tf}°F)</strong> — `,
-      carryOver:     (pull,pullF,target) => `⚠️ Pull from heat at <strong>${pull}°C (${pullF}°F)</strong> — temp rises ~4°C while resting to reach <strong>${target}°C</strong>.`,
-      doneness_hints: {
-        'rare':          'Cool red centre — remove at 46°C, carry-over finishes it',
-        'med-rare':      'Warm red centre — remove at 51°C (recommended for steaks)',
-        'medium':        'Pink throughout — remove at 56°C',
-        'med-well':      'Slightly pink, mostly cooked through',
-        'well-done':     'Fully cooked through — no pink',
-        'fall-off-bone': 'Collagen fully broken down — meat pulls apart with zero resistance',
-        'smoked':        'Low & slow at low temp with hardwood chips. Min 600g required.',
-      },
-      doneness_labels: {
-        'rare':'Rare','med-rare':'Med Rare','medium':'Medium','med-well':'Med Well',
-        'well-done':'Well Done','fall-off-bone':'🦴 Fall Off Bone','smoked':'💨 Smoked',
-      },
-      protein_labels: { beef:'Beef', lamb:'Lamb', pork:'Pork', poultry:'Poultry', fish:'Fish' },
-      cut_labels: {
-        beef:    { ribeye:'Ribeye Steak', sirloin:'Sirloin Steak', fillet:'Fillet Steak', brisket:'Brisket', roast:'Beef Roast', asado:'Asado (Short Ribs)' },
-        lamb:    { leg:'Leg of Lamb', rack:'Rack of Lamb', chops:'Lamb Chops', shoulder:'Shoulder (Slow)' },
-        pork:    { loin:'Pork Loin', chops:'Pork Chops', belly:'Pork Belly', shoulder:'Shoulder (Pulled)', ribs_baby:'Baby Back Ribs', ribs_spare:'Spare Ribs' },
-        poultry: { chicken_whole:'Whole Chicken', chicken_breast:'Chicken Breast', chicken_thigh:'Chicken Thigh', turkey_whole:'Whole Turkey' },
-        fish:    { salmon:'Salmon', palmida:'Frigate Tuna', denis:'Sea Bream', lavrak:'Sea Bass', lokus:'Grouper', amnon:'Tilapia', karpion:'Carp' },
-      },
-      method_labels: { 'pan-sear':'Pan + Oven', 'oven-roast':'Oven', 'oven-slow':'Slow Oven', 'oven-whole':'Whole Roast' },
-    },
-    he: {
-      tagline:       'מחשבון בישול בשר מדויק',
-      geminiKey:     'מפתח Gemini',
-      geminiApiKey:  'מפתח API של Gemini',
-      save:          'שמור',
-      checking:      'בודק…',
-      protein:       'סוג בשר',
-      selectProtein: 'בחר סוג בשר…',
-      selectCut:     'בחר נתח…',
-      chooseCut:     n => `בחר נתח ${n}`,
-      cutsAvail:     n => `${n} נתחים זמינים`,
-      weightDoneness:'משקל ומידת עשייה',
-      weighYour:     n => `שקול את ה<strong>${n}</strong> ובחר מידת עשייה`,
-      donenessLabel: 'מידת עשייה',
-      calculate:     '← חשב זמן בישול',
-      yourCook:      'הבישול שלך',
-      cookTime:      'זמן בישול',
-      ovenTemp:      'חום תנור',
-      restTime:      'זמן מנוחה',
-      stepsLabel:    'הוראות שלב אחר שלב',
-      startOver:     '↺ התחל מחדש',
-      copyResults:   '⎘ העתק תוצאות',
-      cached:        '📁 שמור מקומי',
-      savePhoto:     '⬇ שמור תמונה',
-      hotPan:        'מחבת חמה',
-      targetTemp:    (tc,tf) => `טמפרטורה פנימית יעד: <strong>${tc}°C (${tf}°F)</strong> — `,
-      carryOver:     (pull,pullF,target) => `⚠️ הוצא מהחום ב-<strong>${pull}°C (${pullF}°F)</strong> — הטמפ' עולה ~4°C במנוחה עד <strong>${target}°C</strong>.`,
-      doneness_hints: {
-        'rare':          'מרכז אדום קריר — הוצא ב-46°C, חום שיורי ישלים',
-        'med-rare':      'מרכז אדום-ורדרד חם — הוצא ב-51°C (מומלץ לסטייקים)',
-        'medium':        'ורוד אחיד — הוצא ב-56°C',
-        'med-well':      'ורוד קל, כמעט עשוי לחלוטין',
-        'well-done':     'עשוי לחלוטין — ללא ורוד',
-        'fall-off-bone': 'הקולגן התפרק לחלוטין — הבשר מתפרק ללא התנגדות',
-        'smoked':        'נמוך ואיטי עם שבבי עץ. מינימום 600 גרם.',
-      },
-      doneness_labels: {
-        'rare':'נא מאוד','med-rare':'נא','medium':'בינוני','med-well':'כמעט עשוי',
-        'well-done':'עשוי היטב','fall-off-bone':'🦴 נושר מהעצם','smoked':'💨 מעושן',
-      },
-      protein_labels: { beef:'בקר', lamb:'כבש', pork:'חזיר', poultry:'עוף', fish:'דג' },
-      cut_labels: {
-        beef:    { ribeye:'סטייק ריבאי', sirloin:'סטייק סינטה', fillet:'סטייק פילה', brisket:'בריסקט', roast:'צלי בקר', asado:'אסאדו (שורט ריבס)' },
-        lamb:    { leg:'כרע כבש', rack:'ראק כבש', chops:'צלעות כבש', shoulder:'כתף (איטי)' },
-        pork:    { loin:'פילה חזיר', chops:'קוטלט חזיר', belly:'בטן חזיר', shoulder:'כתף (פולד פורק)', ribs_baby:'צלעות בייבי', ribs_spare:'ספייר ריבס' },
-        poultry: { chicken_whole:'עוף שלם', chicken_breast:'חזה עוף', chicken_thigh:'ירך עוף', turkey_whole:'הודו שלם' },
-        fish:    { salmon:'סלמון', palmida:'פלמידה', denis:'דניס', lavrak:'לברק', lokus:'לוקוס', amnon:'אמנון', karpion:'קרפיון' },
-      },
-      method_labels: { 'pan-sear':'מחבת + תנור', 'oven-roast':'תנור', 'oven-slow':'תנור איטי', 'oven-whole':'צלייה שלמה' },
-    },
-  };
-
-  function t(key) { return STRINGS[currentLang][key]; }
-  function tCutLabel(proteinId, cutId) {
-    return STRINGS[currentLang].cut_labels[proteinId]?.[cutId] || MEAT_CONFIG[proteinId]?.cuts[cutId]?.label || cutId;
-  }
-  function tProteinLabel(proteinId) {
-    return STRINGS[currentLang].protein_labels[proteinId] || proteinId;
-  }
-  function tDonenessLabel(id) {
-    return STRINGS[currentLang].doneness_labels[id] || id;
-  }
-  function tMethod(method) {
-    return STRINGS[currentLang].method_labels[method] || method;
-  }
-
   function toKg(v,u){ return u==='lb'?v/KG_TO_LB:v; }
   function cToF(c){ return Math.round(c*9/5+32); }
 
@@ -2159,7 +2035,7 @@
         <div class="pd-item-icon">
           <svg width="${meta.sz}" height="${meta.sz}" style="display:block"><use href="#${meta.sym}"/></svg>
         </div>
-        <span>${tProteinLabel(id)}</span>`;
+        <span>${meta.label}</span>`;
       btn.onclick = () => selectProtein(id);
       menu.appendChild(btn);
     });
@@ -2200,7 +2076,7 @@
 
     // Update trigger label + icon
     const meta = PROTEIN_META[id];
-    document.getElementById('pd-label').textContent = tProteinLabel(id);
+    document.getElementById('pd-label').textContent = meta.label;
     document.getElementById('pd-label').classList.remove('placeholder');
     document.getElementById('pd-icon').innerHTML =
       `<svg width="${meta.sz}" height="${meta.sz}" style="display:block"><use href="#${meta.sym}"/></svg>`;
@@ -2212,7 +2088,7 @@
     const cdLabel = document.getElementById('cd-label');
     const cdSub   = document.getElementById('cd-label-sub');
     const cdIcon  = document.getElementById('cd-icon');
-    if (cdLabel){ cdLabel.textContent=t('selectCut'); cdLabel.classList.add('placeholder'); }
+    if (cdLabel){ cdLabel.textContent='Select a cut…'; cdLabel.classList.add('placeholder'); }
     if (cdSub)  { cdSub.textContent=''; }
     if (cdIcon) { cdIcon.innerHTML='<svg width="36" height="36" style="display:block;opacity:0.25"><use href="#sv-ribeye"/></svg>'; }
     closeCutDropdownNow();
@@ -2223,8 +2099,8 @@
   function buildCutDropdown() {
     const protein = MEAT_CONFIG[sel.protein];
     const svgMap  = CUT_SVG_ID[sel.protein] || {};
-    document.getElementById('step2-title').textContent = t('chooseCut')(tProteinLabel(sel.protein));
-    document.getElementById('step2-sub').textContent   = t('cutsAvail')(Object.keys(protein.cuts).length);
+    document.getElementById('step2-title').textContent = `Choose your ${protein.label} cut`;
+    document.getElementById('step2-sub').textContent   = `${Object.keys(protein.cuts).length} cuts available`;
     const menu = document.getElementById('cd-menu');
     menu.innerHTML = '';
     Object.entries(protein.cuts).forEach(([id, cut]) => {
@@ -2239,9 +2115,9 @@
       btn.innerHTML = `
         <div class="cd-item-icon">${iconHTML}</div>
         <div class="cd-item-body">
-          <span class="cd-item-name">${tCutLabel(sel.protein, id)}</span>
+          <span class="cd-item-name">${cut.label}</span>
           <div class="cd-item-meta">
-            <span class="cd-badge">${tMethod(cut.method)}</span>
+            <span class="cd-badge">${METHOD_LABELS[cut.method] || cut.method}</span>
             <span class="cd-badge">${ovenC}°C</span>
           </div>
         </div>`;
@@ -2287,10 +2163,10 @@
     const svgMap = CUT_SVG_ID[sel.protein] || {};
     const cut    = MEAT_CONFIG[sel.protein].cuts[id];
     const svgRef = svgMap[id];
-    document.getElementById('cd-label').textContent = tCutLabel(sel.protein, id);
+    document.getElementById('cd-label').textContent = cut.label;
     document.getElementById('cd-label').classList.remove('placeholder');
     document.getElementById('cd-label-sub').textContent =
-      `${tMethod(cut.method)} · ${cut.ovenC}°C`;
+      `${METHOD_LABELS[cut.method] || cut.method} · ${cut.ovenC}°C`;
     document.getElementById('cd-icon').innerHTML = svgRef
       ? `<svg width="36" height="36" style="display:block"><use href="${svgRef}"/></svg>`
       : `<span style="font-size:1.5rem">${METHOD_ICONS[cut.method] || '🍳'}</span>`;
@@ -2314,7 +2190,7 @@
   /* ── STEP 3: Scale / Weight ──────────────────────────────────────────────── */
   function buildDonenessRow() {
     const cut = MEAT_CONFIG[sel.protein].cuts[sel.cut];
-    document.getElementById('scale-protein-name').textContent = tCutLabel(sel.protein, sel.cut);
+    document.getElementById('scale-protein-name').textContent = cut.label;
     document.getElementById('weight-input').value = sel.weight||'';
     updateScaleDisplay();
 
@@ -2329,7 +2205,7 @@
       btn.className=cls; btn.dataset.id=d.id;
       const locked = cut.donenessLock && !cut.donenessLock.includes(d.id);
       btn.disabled = locked;
-      btn.innerHTML = `<span>${tDonenessLabel(d.id)}</span><span class="temp">${d.targetC}°C+</span>`;
+      btn.innerHTML = `<span>${d.label}</span><span class="temp">${d.targetC}°C+</span>`;
       btn.onclick = ()=>selectDoneness(d.id);
       row.appendChild(btn);
     });
@@ -2366,8 +2242,16 @@
     const d   = DONENESS.find(x=>x.id===id);
     const tc  = (cut.targetCMap&&cut.targetCMap[id])||d.targetC;
     const hint = document.getElementById('doneness-hint-box');
-    const descs = STRINGS[currentLang].doneness_hints;
-    hint.innerHTML = t('targetTemp')(tc, cToF(tc)) + (descs[id]||'');
+    const descs = {
+      'rare':'Cool red centre — remove at 46°C, carry-over finishes it',
+      'med-rare':'Warm red centre — remove at 51°C (recommended for steaks)',
+      'medium':'Pink throughout — remove at 56°C',
+      'med-well':'Slightly pink, mostly cooked through',
+      'well-done':'Fully cooked through — no pink',
+      'fall-off-bone':'Collagen fully broken down — meat pulls apart with zero resistance',
+      'smoked':'Low & slow at low temp with hardwood chips. Min 600g required.',
+    };
+    hint.innerHTML = `Target internal temp: <strong>${tc}°C (${cToF(tc)}°F)</strong> — ${descs[id]||''}`;
     hint.classList.add('visible');
     checkCalcReady();
     // Smooth scroll to calc button
@@ -2380,11 +2264,6 @@
   /* ── TIME FORMATTER ─────────────────────────────────────────────────────── */
   function fmtMin(m) {
     m = Math.round(m);
-    if (currentLang === 'he') {
-      if (m < 60) return m + " דק'";
-      const h = Math.floor(m / 60), rem = m % 60;
-      return rem ? h + " ש' " + rem + " דק'" : h + " ש'";
-    }
     if (m < 60) return m + ' min';
     const h   = Math.floor(m / 60);
     const rem = m % 60;
@@ -2413,7 +2292,7 @@
     // Summary
     const wLabel = `${sel.weight}${sel.unit}`;
     document.getElementById('result-summary-text').textContent =
-      `${tProteinLabel(proteinId)} · ${tCutLabel(proteinId, cutId)} · ${wLabel} · ${tDonenessLabel(donenessId)}`;
+      `${protein.label} · ${cut.label} · ${wLabel} · ${dObj.label}`;
 
     // Dish photo
     loadDishPhoto(proteinId, cutId, donenessId, weightKg);
@@ -2422,7 +2301,7 @@
     document.getElementById('rc-cook').textContent     = fmtMin(cookMin);
     document.getElementById('rc-cook-unit').textContent= '';
     document.getElementById('rc-temp').textContent     = ovenC||'🔥';
-    document.getElementById('rc-temp-unit').textContent= ovenC ? `°C (${cToF(ovenC)}°F)` : t('hotPan');
+    document.getElementById('rc-temp-unit').textContent= ovenC ? `°C (${cToF(ovenC)}°F)` : 'Hot Pan';
     document.getElementById('rc-rest').textContent     = fmtMin(restMin);
     document.getElementById('rc-rest-unit').textContent= '';
 
@@ -2430,7 +2309,7 @@
     const cowBox = document.getElementById('cow-box');
     if(dObj.carryOver){
       const pullC = targetC-4;
-      cowBox.innerHTML = t('carryOver')(pullC, cToF(pullC), targetC);
+      cowBox.innerHTML = `⚠️ Pull from heat at <strong>${pullC}°C (${cToF(pullC)}°F)</strong> — temp rises ~4°C while resting to reach <strong>${targetC}°C</strong>.`;
       cowBox.classList.add('visible');
     } else { cowBox.classList.remove('visible'); }
 
@@ -2460,7 +2339,6 @@
 
   /* ── STEP GENERATOR (condensed) ──────────────────────────────────────────── */
   function buildSteps(cut, cookMin, ovenC, restMin, donenessId, targetC) {
-    if (currentLang === 'he') return buildStepsHe(cut, cookMin, ovenC, restMin, donenessId, targetC);
     const steps=[]; const m=cut.method; const pullC=targetC-4;
     if(donenessId==='fall-off-bone'){
       if(cut.isRibs){
@@ -2518,66 +2396,6 @@
     return steps;
   }
 
-
-  /* ── STEP GENERATOR — Hebrew ─────────────────────────────────────────────── */
-  function buildStepsHe(cut, cookMin, ovenC, restMin, donenessId, targetC) {
-    const steps=[]; const m=cut.method; const pullC=targetC-4;
-    if(donenessId==='fall-off-bone'){
-      if(cut.isRibs){
-        steps.push(`הסר את הסרום מצד העצם; מרח תיבול יבש, מנוחה 30 דק'`);
-        steps.push(`חמם תנור ל-${ovenC}°C`);
-        steps.push(`עטוף היטב ב-2 שכבות נייר כסף. אפה לאט ${fmtMin(cookMin)}`);
-        steps.push(`פתח; מרח רוטב BBQ, חזור לתנור 15–20 דק' ללא כיסוי`);
-        steps.push(`מנוחה רפויה ${fmtMin(restMin)}`);
-      } else {
-        steps.push('הוצא מהמקרר 30–60 דקות לפני הבישול');
-        steps.push(`חמם תנור ל-${ovenC}°C (נמוך ואיטי)`);
-        steps.push('תבל ביד נדיבה; אופציונלי — צרוב מכל הצדדים. הכנס לסיר צרפתי סגור או נייר כסף כפול עם תבלינים');
-        steps.push(`אפה לאט ${fmtMin(cookMin)}`);
-        steps.push(`בדוק בזמן ${fmtMin(Math.round(cookMin*0.85))} — צריך להתפרק בשתי מזלגות`);
-        steps.push(`מנוחה מכוסה ${fmtMin(restMin)}`);
-      }
-      return steps;
-    }
-    if(donenessId==='smoked'){
-      steps.push(`השרה 2–3 חופנים שבבי עץ 30 דק' עטוף בנייר כסף כפול, נקב 6–8 חורים — כרית עשן`);
-      steps.push(`הנח כרית על רצפת התנור. חמם ל-${ovenC}°C, המתן 20–30 דק' לעשן להתחיל`);
-      if(cut.isRibs){
-        steps.push('מרח תיבול יבש; עשן ללא כיסוי חצי ראשון, ואז Texas Crutch (עטוף בנייר כסף עם מיץ תפוחים)');
-        steps.push('פתח, מרח רוטב BBQ ב-20 הדקות האחרונות');
-      } else {
-        const stall=Math.round(cookMin*0.55);
-        steps.push(`עשן ללא כיסוי ${fmtMin(stall)} — תיווצר קליפה. צפוי עצירת טמפ' ב-65–70°C (נורמלי)`);
-        steps.push(`עטוף בנייר כסף; המשך ~${fmtMin(cookMin-stall)} עד שבדיקת חום מגיעה ${targetC}°C`);
-      }
-      steps.push(`מנוחה עטוף במגבות ${fmtMin(restMin)}`);
-      return steps;
-    }
-    if(m==='pan-sear'){
-      steps.push('חמם מחבת יבשה לחום גבוה (ללא שמן)');
-      steps.push(`צרוב ${Math.round(cut.C/2)} דק' כל צד`);
-      steps.push(`סיים בתנור ${ovenC}°C ~${fmtMin(Math.max(1,cookMin-cut.C))}`);
-      steps.push(`הוצא בטמפ' ${pullC}°C (חום שיורי יגיע ל-${targetC}°C)`);
-    } else if(m==='oven-slow'){
-      steps.push(`חמם תנור ל-${ovenC}°C`);
-      steps.push('תבל; סגור בסיר צרפתי או נייר כסף הדוק');
-      steps.push(`אפה לאט ${fmtMin(cookMin)}`);
-      steps.push(`טמפ' פנימית יעד: ${targetC}°C`);
-    } else if(m==='oven-whole'){
-      steps.push(`חמם תנור ל-${ovenC}°C`);
-      steps.push('יבש היטב; קשור ותבל מבפנים ומבחוץ');
-      steps.push(`אפה ${fmtMin(cookMin)}, שפוך נוזלים באמצע הבישול`);
-      steps.push(`בדוק בחלק העבה של הירך — יעד ${targetC}°C`);
-    } else {
-      steps.push(`חמם תנור ל-${ovenC}°C`);
-      steps.push('תבל והנח על רשת או תבנית מרופדת');
-      steps.push(`אפה ${fmtMin(cookMin)} (בדוק בזמן ${fmtMin(cookMin-10)})`);
-      steps.push(cut.isFish ? `הדג מוכן כשהבשר מתפרד ומגיע ל-${targetC}°C (${cToF(targetC)}°F)` : `הוצא ב-${pullC}°C — חום שיורי ישלים ל-${targetC}°C`);
-    }
-    steps.push(`מנוחה ${fmtMin(restMin)} לפני החיתוך`);
-    return steps;
-  }
-
   /* ── COPY + RESTART ──────────────────────────────────────────────────────── */
   function copyResults() {
     const cook = document.getElementById('rc-cook').textContent;
@@ -2630,101 +2448,6 @@
 
   /* ── INIT ────────────────────────────────────────────────────────────────── */
   // Single-page: nothing to init — sections reveal on interaction
-
-  /* ── LANGUAGE TOGGLE ────────────────────────────────────────────────────── */
-  function applyLang() {
-    const L   = STRINGS[currentLang];
-    const dir = currentLang === 'he' ? 'rtl' : 'ltr';
-    document.documentElement.dir  = dir;
-    document.documentElement.lang = currentLang;
-
-    // Toggle button only (header strip stays English always)
-    const langBtn = document.getElementById('lang-toggle-btn');
-    if (langBtn) langBtn.textContent = currentLang === 'en' ? 'HE' : 'EN';
-
-    // Section labels
-    const secCutLbl = document.querySelector('#sec-cut .section-label');
-    if (secCutLbl) secCutLbl.textContent = L.protein;
-
-    // Protein placeholder (only when nothing selected)
-    const pdLabel = document.getElementById('pd-label');
-    if (pdLabel && pdLabel.classList.contains('placeholder')) pdLabel.textContent = L.selectProtein;
-    else if (pdLabel && sel.protein) pdLabel.textContent = tProteinLabel(sel.protein);
-
-    // Cut section title
-    const step2t = document.getElementById('step2-title');
-    if (step2t && sel.protein)
-      step2t.textContent = L.chooseCut(tProteinLabel(sel.protein));
-
-    // Cut placeholder / selected label
-    const cdLabel = document.getElementById('cd-label');
-    if (cdLabel && cdLabel.classList.contains('placeholder')) cdLabel.textContent = L.selectCut;
-    else if (cdLabel && sel.protein && sel.cut) cdLabel.textContent = tCutLabel(sel.protein, sel.cut);
-
-    // Cut sub (method · temp)
-    if (sel.protein && sel.cut) {
-      const cut    = MEAT_CONFIG[sel.protein].cuts[sel.cut];
-      const cdSub  = document.getElementById('cd-label-sub');
-      if (cdSub && cdSub.textContent) cdSub.textContent = `${tMethod(cut.method)} · ${cut.ovenC}°C`;
-    }
-
-    // Weight & Doneness section
-    const wdLbl = document.querySelector('#sec-weight .section-label');
-    if (wdLbl) wdLbl.textContent = L.weightDoneness;
-    const wdSub = document.querySelector('#sec-weight .section-sub');
-    if (wdSub && sel.protein && sel.cut)
-      wdSub.innerHTML = L.weighYour(tCutLabel(sel.protein, sel.cut));
-    const dnLbl = document.querySelector('.doneness-label');
-    if (dnLbl) dnLbl.textContent = L.donenessLabel;
-
-    // Scale protein name
-    const scaleName = document.getElementById('scale-protein-name');
-    if (scaleName && sel.protein && sel.cut)
-      scaleName.textContent = tCutLabel(sel.protein, sel.cut);
-
-    // Calculate button
-    const calcBtn = document.getElementById('btn-calculate');
-    if (calcBtn) calcBtn.textContent = L.calculate;
-
-    // Results section labels
-    const yourCookLbl = document.querySelector('#sec-results .section-label');
-    if (yourCookLbl) yourCookLbl.textContent = L.yourCook;
-    const rcLabels = document.querySelectorAll('.rc-label');
-    if (rcLabels[0]) rcLabels[0].textContent = L.cookTime;
-    if (rcLabels[1]) rcLabels[1].textContent = L.ovenTemp;
-    if (rcLabels[2]) rcLabels[2].textContent = L.restTime;
-    const stepsLbl = document.querySelector('.results-steps-label');
-    if (stepsLbl) stepsLbl.textContent = L.stepsLabel;
-
-    // Buttons
-    const restartBtns = document.querySelectorAll('.btn-restart-inline');
-    if (restartBtns[0]) restartBtns[0].textContent = L.startOver;
-    if (restartBtns[1]) restartBtns[1].textContent = L.copyResults;
-
-    // Photo badges
-    const cacheBadge = document.getElementById('dish-cache-badge');
-    if (cacheBadge) cacheBadge.textContent = L.cached;
-    const savePhotoBtn = document.getElementById('dish-save-btn');
-    if (savePhotoBtn) savePhotoBtn.textContent = L.savePhoto;
-
-    // Rebuild doneness buttons if visible
-    if (sel.protein && sel.cut && document.getElementById('doneness-row').children.length > 0) {
-      buildDonenessRow();
-      if (sel.doneness) selectDoneness(sel.doneness);
-    }
-
-    // Rebuild results if showing
-    const resEl = document.getElementById('sec-results');
-    if (resEl && resEl.classList.contains('pg-reveal') && sel.protein && sel.cut && sel.doneness && sel.weight) {
-      buildResults();
-    }
-  }
-
-  function toggleLang() {
-    currentLang = currentLang === 'en' ? 'he' : 'en';
-    applyLang();
-  }
-
 </script>
 </body>
 </html>

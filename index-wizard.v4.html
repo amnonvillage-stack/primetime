@@ -37,7 +37,6 @@
 
     /* ── Header ─────────────────────────────────────────────────────────────── */
     .app-header {
-      direction: ltr;
       background: var(--red);
       padding: 14px 24px;
       display: flex; align-items: center; justify-content: space-between;
@@ -221,7 +220,7 @@
       z-index: 80; background: var(--card);
       border: 2px solid var(--line); border-radius: var(--radius);
       box-shadow: 0 8px 32px rgba(44,62,80,0.14);
-      overflow: hidden; direction: ltr;
+      overflow: hidden;
     }
     .pd-item {
       display: flex; align-items: center; gap: 10px;
@@ -1496,7 +1495,7 @@
 <header class="app-header">
   <div class="header-logo">PrimeTime <span id="header-tagline">Precision Meat Calculator</span></div>
   <div style="display:flex;gap:8px;align-items:center">
-    <button class="lang-toggle" id="lang-toggle-btn" onclick="toggleLang()" title="Switch language">HE</button>
+    <button class="lang-toggle" id="lang-toggle-btn" onclick="toggleLang()" title="Switch language">🇮🇱</button>
     <button class="header-key-btn" id="header-key-btn" onclick="toggleKeyBar()" title="Set Gemini API key">
       <span class="key-dot" id="key-dot"></span>
       <span id="header-key-label">Gemini Key</span>
@@ -2159,7 +2158,7 @@
         <div class="pd-item-icon">
           <svg width="${meta.sz}" height="${meta.sz}" style="display:block"><use href="#${meta.sym}"/></svg>
         </div>
-        <span>${tProteinLabel(id)}</span>`;
+        <span>${meta.label}</span>`;
       btn.onclick = () => selectProtein(id);
       menu.appendChild(btn);
     });
@@ -2638,9 +2637,19 @@
     document.documentElement.dir  = dir;
     document.documentElement.lang = currentLang;
 
-    // Toggle button only (header strip stays English always)
+    // Header
+    const tagEl = document.getElementById('header-tagline');
+    if (tagEl) tagEl.textContent = L.tagline;
+    const keyLbl = document.getElementById('header-key-label');
+    if (keyLbl) keyLbl.textContent = L.geminiKey;
+    // Key bar
+    const kbLabel = document.querySelector('.key-bar label');
+    if (kbLabel) kbLabel.textContent = L.geminiApiKey;
+    const kbSave  = document.querySelector('.key-bar-save');
+    if (kbSave)  kbSave.textContent  = L.save;
+    // Toggle button: show flag of OTHER language (the one you'd switch TO)
     const langBtn = document.getElementById('lang-toggle-btn');
-    if (langBtn) langBtn.textContent = currentLang === 'en' ? 'HE' : 'EN';
+    if (langBtn) langBtn.textContent = currentLang === 'en' ? '🇮🇱' : '🇺🇸';
 
     // Section labels
     const secCutLbl = document.querySelector('#sec-cut .section-label');
