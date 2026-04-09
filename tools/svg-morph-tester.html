@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SVG Morph Tester — Premium Tool</title>
+  <script src="https://unpkg.com/flubber@0.4.2/build/flubber.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #09090b;
+      background-image: 
+        radial-gradient(circle at 15% 50%, rgba(192, 57, 43, 0.08), transparent 25%),
+        radial-gradient(circle at 85% 30%, rgba(41, 128, 185, 0.08), transparent 25%);
+      color: #fafafa;
+      font-family: 'Inter', -apple-system, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 24px;
+      gap: 40px;
+    }
+
+    h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff 0%, #a1a1aa 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .subtitle {
+      color: #a1a1aa;
+      font-size: 14px;
+      margin-top: -30px;
+      margin-bottom: 20px;
+      letter-spacing: 0.05em;
+      text-align: center;
+    }
+
+    /* ── Layout ──────────────────────────────────────────────────────── */
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .row {
+      display: flex;
+      gap: 24px;
+      width: 100%;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .row { flex-direction: column; }
+    }
+
+    /* ── Dropzones ───────────────────────────────────────────────────── */
+    .drop-card {
+      flex: 1;
+      height: 250px;
+      background: linear-gradient(145deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+      backdrop-filter: blur(10px);
+      border: 2px dashed rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      overflow: hidden;
+      padding: 24px;
+    }
+
+    .drop-card:hover, .drop-card.drag-over {
+      background: rgba(255,255,255,0.06);
+      border-color: rgba(255, 255, 255, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .drop-card input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      z-index: 10;
+    }
+
+    .drop-card .icon {
+      font-size: 32px;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+
+    .drop-card h3 {
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      margin-bottom: 8px;
+    }
+
+    .drop-card p {
+      font-size: 13px;
+      color: #71717a;
+      text-align: center;
+    }
+
+    .drop-card .preview-svg {
+      position: absolute;
+      inset: 16px;
+      z-index: 5;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .drop-card .preview-svg svg {
+      width: 100%;
+      height: 100%;
+      max-width: 150px;
+      max-height: 150px;
+    }
+
+    .drop-card.has-file .icon,
+    .drop-card.has-file h3,
+    .drop-card.has-file p {
+      opacity: 0;
+    }
+
+    .drop-card.has-file .preview-svg {
+      opacity: 1;
+    }
+
+    /* ── Controls Area ───────────────────────────────────────────────── */
+    .controls-panel {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #d4d4d8;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+      padding-bottom: 8px;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .setting-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .setting-group label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #a1a1aa;
+      text-transform: uppercase;
+    }
+
+    .setting-group input[type="number"], .setting-group select, .setting-group input[type="range"] {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 10px 12px;
+      border-radius: 8px;
+      font-family: inherit;
+      width: 100%;
+      font-size: 13px;
+    }
+
+    .action-btn {
+      background: #fafafa;
+      color: #09090b;
+      border: none;
+      padding: 14px 24px;
+      border-radius: 12px;
+      font-family: 'Outfit';
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      align-self: flex-start;
+    }
+
+    .action-btn:hover {
+      background: #e4e4e7;
+      transform: translateY(-2px);
+    }
+    
+    .action-btn:disabled {
+      background: #52525b;
+      color: #a1a1aa;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* ── Morph Output ────────────────────────────────────────────────── */
+    .morph-viewer {
+      background: linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 32px;
+      height: 450px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    }
+
+    .output-svg-wrap {
+      width: 300px;
+      height: 300px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .output-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.6));
+    }
+
+    /* Animation Scrubber & Play */
+    .scrubber-wrap {
+      position: absolute;
+      bottom: 24px;
+      left: 32px;
+      right: 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .play-btn {
+      background: #fafafa;
+      color: #09090b;
+      border: none;
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .play-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(255,255,255,0.3);
+    }
+
+    .scrubber {
+      flex: 1;
+      -webkit-appearance: none;
+      background: rgba(255,255,255,0.1);
+      height: 6px;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .scrubber::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fafafa;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+      transition: transform 0.1s;
+    }
+
+    .scrubber::-webkit-slider-thumb:hover {
+      transform: scale(1.3);
+    }
+    
+    .status {
+      text-align: center;
+      font-size: 13px;
+      color: #a1a1aa;
+      margin-top: -20px;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+    
+    .code-export {
+      width: 100%;
+      background: #18181b;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 16px;
+      color: #a1a1aa;
+      font-family: inherit;
+      font-size: 12px;
+      height: 120px;
+      resize: none;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>SVG Morph Tester</h1>
+  <div class="subtitle">Upload two SVGs to generate and tune an interactive fluid morph that preserves color layers</div>
+
+  <div class="app-container">
+    
+    <!-- Upload Row -->
+    <div class="row">
+      <!-- State A -->
+      <div class="drop-card" id="drop-a">
+        <input type="file" id="file-a" accept=".svg">
+        <div class="icon">📄</div>
+        <h3>STATE A</h3>
+        <p>Drop SVG File Here</p>
+        <div class="preview-svg" id="preview-a"></div>
+      </div>
+      
+      <!-- State B -->
+      <div class="drop-card" id="drop-b">
+        <input type="file" id="file-b" accept=".svg">
+        <div class="icon">📄</div>
+        <h3>STATE B</h3>
+        <p>Drop SVG File Here</p>
+        <div class="preview-svg" id="preview-b"></div>
+      </div>
+    </div>
+
+    <!-- Configuration Settings -->
+    <div class="controls-panel">
+      <div class="section-title">Flubber Interpolator Settings</div>
+      <div class="settings-grid">
+        <div class="setting-group">
+          <label>Max Segment Length (Smoothness)</label>
+          <input type="number" id="setting-maxseg" value="2" step="0.5" min="0.1">
+        </div>
+        <div class="setting-group">
+          <label>Match Topology Strategy</label>
+          <select id="setting-single">
+            <option value="true" selected>true (Treat paths as unified polygon)</option>
+            <option value="false">false (Auto-match separate loops)</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label>Color & Layer Mapping</label>
+          <select id="setting-colormode">
+            <option value="auto" selected>Auto-Match By Exact Color</option>
+            <option value="force">Force Map (Merge into 1 Layer)</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="section-title" style="margin-top:10px;">Spring Physics Details</div>
+      <div class="settings-grid">
+        <div class="setting-group">
+          <label>Tension (Bounciness)</label>
+          <div style="display:flex; gap:12px; align-items:center;">
+             <input type="range" id="setting-tension" min="10" max="300" value="120">
+             <span id="tension-val" style="font-size:12px; color:#fff; width:30px;">120</span>
+          </div>
+        </div>
+        <div class="setting-group">
+          <label>Friction (Damping)</label>
+          <div style="display:flex; gap:12px; align-items:center;">
+             <input type="range" id="setting-friction" min="2" max="60" value="14">
+             <span id="friction-val" style="font-size:12px; color:#fff; width:30px;">14</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
+        <button class="action-btn" id="btn-compile">Compile Detailed Morph</button>
+        <span id="layer-count" style="font-size: 13px; color: #a1a1aa; font-weight: 500;"></span>
+      </div>
+    </div>
+    
+    <div class="status" id="status-msg">
+      Awaiting SVG upload... Colors will be extracted and matched automatically.
+    </div>
+
+    <!-- Viewer -->
+    <div class="morph-viewer">
+      <div class="output-svg-wrap">
+        <svg id="morph-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+           <!-- Dynamic paths rendered here -->
+        </svg>
+      </div>
+
+      <div class="scrubber-wrap">
+        <button class="play-btn" id="btn-play">▶</button>
+        <input type="range" class="scrubber" id="scrubber" min="0" max="1" step="0.001" value="0">
+      </div>
+    </div>
+    
+    <!-- Code Export -->
+    <div class="controls-panel">
+      <div class="section-title">Compiled Mapped Paths (JavaScript)</div>
+      <textarea class="code-export" id="code-output" readonly placeholder="Output paths will appear here..."></textarea>
+      
+      <div class="section-title" style="margin-top:20px;">Normalized SVG Source A</div>
+      <textarea class="code-export" id="source-a-output" readonly placeholder="Normalized SVG A will appear here..."></textarea>
+      
+      <div class="section-title" style="margin-top:20px;">Normalized SVG Source B</div>
+      <textarea class="code-export" id="source-b-output" readonly placeholder="Normalized SVG B will appear here..."></textarea>
+    </div>
+
+  </div>
+
+  <script>
+    // ── Global State ────────────────────────────────────────────────────────
+    let parsedA = { viewBox: [0, 0, 100, 100], layers: {} };
+    let parsedB = { viewBox: [0, 0, 100, 100], layers: {} };
+    
+    let isPlaying = false;
+    let interpolators = {}; // map of { fillColor: interpolatorFn }
+    
+    let currentT = 0;
+    
+    // Spring physics configuration
+    let targetT = 0;
+    let velocity = 0;
+    let tension = 120;
+    let friction = 14;
+    let lastTime = 0;
+    let rafId = null;
+
+    // ── DOM Elements ────────────────────────────────────────────────────────
+    const fileA = document.getElementById('file-a');
+    const fileB = document.getElementById('file-b');
+    const dropA = document.getElementById('drop-a');
+    const dropB = document.getElementById('drop-b');
+    const previewA = document.getElementById('preview-a');
+    const previewB = document.getElementById('preview-b');
+    
+    const maxSegInput = document.getElementById('setting-maxseg');
+    const singleSelect = document.getElementById('setting-single');
+    const colorModeSelect = document.getElementById('setting-colormode');
+    const tensionInput = document.getElementById('setting-tension');
+    const tensionVal   = document.getElementById('tension-val');
+    const frictionInput = document.getElementById('setting-friction');
+    const frictionVal   = document.getElementById('friction-val');
+    
+    const btnCompile = document.getElementById('btn-compile');
+    const layerCountDisplay = document.getElementById('layer-count');
+    const codeOutput = document.getElementById('code-output');
+    
+    const morphSvg = document.getElementById('morph-svg');
+    const scrubber = document.getElementById('scrubber');
+    const btnPlay = document.getElementById('btn-play');
+    const statusMsg = document.getElementById('status-msg');
+
+    // Live update the spring physics
+    tensionInput.addEventListener('input', e => { tension = parseInt(e.target.value); tensionVal.textContent = tension; });
+    frictionInput.addEventListener('input', e => { friction = parseInt(e.target.value); frictionVal.textContent = friction; });
+
+    // ── Helper: SVG Parser & Shape Converter ────────────────────────────────
+    
+    function convertToPaths(svgDoc) {
+      // Basic rects
+      svgDoc.querySelectorAll('rect').forEach(el => {
+        const x = parseFloat(el.getAttribute('x'))||0; const y = parseFloat(el.getAttribute('y'))||0;
+        const w = parseFloat(el.getAttribute('width'))||0; const h = parseFloat(el.getAttribute('height'))||0;
+        const d = `M${x},${y} L${x+w},${y} L${x+w},${y+h} L${x},${y+h} Z`;
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute('d', d); copyAttributes(el, p, ['x','y','width','height']);
+        el.replaceWith(p);
+      });
+      // Basic circles
+      svgDoc.querySelectorAll('circle').forEach(el => {
+        const cx = parseFloat(el.getAttribute('cx'))||0; const cy = parseFloat(el.getAttribute('cy'))||0;
+        const r = parseFloat(el.getAttribute('r'))||0;
+        const d = `M ${cx-r},${cy} a ${r},${r} 0 1,0 ${r*2},0 a ${r},${r} 0 1,0 -${r*2},0`;
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute('d', d); copyAttributes(el, p, ['cx','cy','r']);
+        el.replaceWith(p);
+      });
+      // Polygon / Polyline
+      svgDoc.querySelectorAll('polygon, polyline').forEach(el => {
+        const ptsAttr = el.getAttribute('points');
+        if(!ptsAttr) return;
+        const points = ptsAttr.trim().split(/[\s,]+/);
+        if(points.length < 2) return;
+        let d = `M${points[0]},${points[1]} `;
+        for(let i=2; i<points.length-1; i+=2) d += `L${points[i]},${points[i+1]} `;
+        if(el.tagName.toLowerCase() === 'polygon') d += 'Z';
+        const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        p.setAttribute('d', d); copyAttributes(el, p, ['points']);
+        el.replaceWith(p);
+      });
+    }
+
+    function copyAttributes(from, to, exclude) {
+      for (const attr of from.attributes) {
+        if (!exclude.includes(attr.name)) to.setAttribute(attr.name, attr.value);
+      }
+    }
+
+    function rgbToHex(rgb) {
+      if (rgb.startsWith('#')) return rgb;
+      const match = rgb.match(/^rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return rgb;
+      return "#" + match.slice(1).map(n => parseInt(n, 10).toString(16).padStart(2, '0')).join('');
+    }
+
+    function extractSvgInfo(svgText) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(svgText, "image/svg+xml");
+      
+      if(doc.querySelector("parsererror")) return { error: "Invalid SVG format." };
+      
+      const svgEl = doc.querySelector("svg");
+      if(!svgEl) return { error: "No SVG tag found." };
+      
+      // Temporarily append to body to compute styles (for inherited fills or class-based styling)
+      svgEl.style.position = 'absolute';
+      svgEl.style.visibility = 'hidden';
+      svgEl.style.pointerEvents = 'none';
+      svgEl.style.width = '0';
+      svgEl.style.height = '0';
+      document.body.appendChild(svgEl);
+      
+      // Normalize shapes to <path>
+      convertToPaths(svgEl);
+      
+      let layers = {}; 
+      const paths = svgEl.querySelectorAll('path');
+      
+      paths.forEach(p => {
+        const d = p.getAttribute('d');
+        if (!d) return;
+        
+        let fill = window.getComputedStyle(p).fill;
+        
+        // If computed fill is somehow "none" or empty, try attribute, or default
+        if (!fill || fill === 'none') {
+           fill = p.getAttribute('fill') || '#242424';
+        }
+        
+        fill = rgbToHex(fill.trim().toLowerCase());
+        
+        if (!layers[fill]) layers[fill] = "";
+        layers[fill] += d + " ";
+      });
+      
+      let vb = [0, 0, 100, 100];
+      if (svgEl.hasAttribute('viewBox')) {
+        vb = svgEl.getAttribute('viewBox').split(/[\s,]+/).map(parseFloat);
+      }
+
+      // Reset injected styles before cloning
+      svgEl.style.position = '';
+      svgEl.style.visibility = '';
+      svgEl.style.pointerEvents = '';
+      svgEl.style.width = '';
+      svgEl.style.height = '';
+      
+      // Store a clean clone for the preview
+      const clone = svgEl.cloneNode(true);
+      
+      // Remove the live element used for computed style extraction
+      document.body.removeChild(svgEl);
+      
+      if (Object.keys(layers).length === 0) {
+        return { error: "No meaningful paths found." };
+      }
+      
+      return { layers, viewBox: vb, rawDoc: clone };
+    }
+
+    // ── Drag & Drop Handlers ────────────────────────────────────────────────
+    function setupDropZone(dropEl, fileInput, previewEl, stateId) {
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(evt => {
+        dropEl.addEventListener(evt, (e) => { e.preventDefault(); e.stopPropagation(); });
+      });
+      ['dragenter', 'dragover'].forEach(evt => dropEl.addEventListener(evt, () => dropEl.classList.add('drag-over')));
+      ['dragleave', 'drop'].forEach(evt => dropEl.addEventListener(evt, () => dropEl.classList.remove('drag-over')));
+
+      dropEl.addEventListener('drop', (e) => {
+        let files = e.dataTransfer.files;
+        if (files.length) handleFile(files[0], dropEl, previewEl, stateId);
+      });
+
+      fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) handleFile(e.target.files[0], dropEl, previewEl, stateId);
+      });
+    }
+
+    function handleFile(file, dropEl, previewEl, stateId) {
+      if(!file.name.toLowerCase().endsWith('.svg')) {
+        statusMsg.style.color = "#f87171";
+        statusMsg.textContent = "Please upload a valid .svg file.";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = extractSvgInfo(e.target.result);
+        if (result.error) {
+          statusMsg.style.color = "#f87171";
+          statusMsg.textContent = result.error;
+          return;
+        }
+
+        if(stateId === 'A') parsedA = result;
+        else parsedB = result;
+        
+        dropEl.classList.add('has-file');
+        previewEl.innerHTML = "";
+        const clone = result.rawDoc.cloneNode(true);
+        clone.style.width = '100%'; clone.style.height = '100%';
+        previewEl.appendChild(clone);
+        
+        const layerCount = Object.keys(result.layers).length;
+        statusMsg.style.color = "#10b981";
+        statusMsg.textContent = `State ${stateId} loaded. Flattened into ${layerCount} colored layer(s).`;
+        
+        if (Object.keys(parsedA.layers).length && Object.keys(parsedB.layers).length) compileMorph();
+      };
+      reader.readAsText(file);
+    }
+
+    setupDropZone(dropA, fileA, previewA, 'A');
+    setupDropZone(dropB, fileB, previewB, 'B');
+
+    // ── Compiler & Interpolator ─────────────────────────────────────────────
+    
+    function lerpColor(c1, c2, t) {
+      if(!c1.startsWith('#') || !c2.startsWith('#')) return c1;
+      const r1 = parseInt(c1.substring(1, 3), 16), g1 = parseInt(c1.substring(3, 5), 16), b1 = parseInt(c1.substring(5, 7), 16);
+      const r2 = parseInt(c2.substring(1, 3), 16), g2 = parseInt(c2.substring(3, 5), 16), b2 = parseInt(c2.substring(5, 7), 16);
+      const r = Math.round(r1 + (r2 - r1) * t);
+      const g = Math.round(g1 + (g2 - g1) * t);
+      const b = Math.round(b1 + (b2 - b1) * t);
+      return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+    }
+
+    function compileMorph() {
+      if(!Object.keys(parsedA.layers).length || !Object.keys(parsedB.layers).length) {
+        statusMsg.style.color = "#f87171";
+        statusMsg.textContent = "States missing.";
+        return;
+      }
+      
+      btnCompile.textContent = "Compiling...";
+      btnCompile.disabled = true;
+
+      setTimeout(() => {
+        try {
+          const maxSeg = parseFloat(maxSegInput.value) || 2;
+          const mapSingle = singleSelect.value === 'true';
+          const mode = colorModeSelect.value;
+          const opts = { maxSegmentLength: maxSeg, single: mapSingle };
+          
+          interpolators = {};
+          morphSvg.innerHTML = ""; // clear viewer
+          
+          let codeDump = '';
+          const keysA = Object.keys(parsedA.layers);
+          const keysB = Object.keys(parsedB.layers);
+
+          // Force Merge into 1 Layer Mode OR Auto single-color mismatch mapping
+          if (mode === 'force' || (keysA.length === 1 && keysB.length === 1)) {
+            let combinedA = "", combinedB = "";
+            let colorA = keysA[0] || "#ffffff";
+            let colorB = keysB[0] || "#ffffff";
+            
+            keysA.forEach(k => combinedA += parsedA.layers[k] + " ");
+            keysB.forEach(k => combinedB += parsedB.layers[k] + " ");
+            
+            combinedA = combinedA.trim(); combinedB = combinedB.trim();
+            
+            codeDump = `const A_Paths = { "merged": "${combinedA}" };\n\nconst B_Paths = { "merged": "${combinedB}" };\n`;
+            
+            const interpShape = flubber.interpolate(combinedA, combinedB, opts);
+            
+            interpolators["merged"] = (t) => {
+               return {
+                  d: interpShape(t),
+                  fill: lerpColor(colorA, colorB, t)
+               };
+            };
+            
+            const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            p.dataset.color = "merged";
+            morphSvg.appendChild(p);
+            
+            layerCountDisplay.textContent = `Rendering 1 flattened layer`;
+            
+          } else {
+            // Auto Color Match Mode
+            const allColors = new Set([...keysA, ...keysB]);
+            
+            codeDump = `const A_Paths = {\n`;
+            allColors.forEach(c => codeDump += `  "${c}": "${(parsedA.layers[c]||"").trim()}",\n`);
+            codeDump += `};\n\nconst B_Paths = {\n`;
+            allColors.forEach(c => codeDump += `  "${c}": "${(parsedB.layers[c]||"").trim()}",\n`);
+            codeDump += `};\n`;
+
+            allColors.forEach(color => {
+              const dA = parsedA.layers[color] || "M0,0 Z";
+              const dB = parsedB.layers[color] || "M0,0 Z";
+              
+              const interpShape = flubber.interpolate(dA, dB, opts);
+              interpolators[color] = (t) => ({ d: interpShape(t), fill: color });
+              
+              const p = document.createElementNS("http://www.w3.org/2000/svg", "path");
+              p.dataset.color = color;
+              morphSvg.appendChild(p);
+            });
+            
+            layerCountDisplay.textContent = `Rendering ${allColors.size} detailed color layers`;
+          }
+          
+          codeOutput.value = codeDump;
+          document.getElementById('source-a-output').value = parsedA.rawDoc ? parsedA.rawDoc.outerHTML : '';
+          document.getElementById('source-b-output').value = parsedB.rawDoc ? parsedB.rawDoc.outerHTML : '';
+
+          currentT = 0; scrubber.value = 0; isPlaying = false; btnPlay.textContent = "▶";
+          applyFrame(0);
+          
+          statusMsg.style.color = "#10b981";
+          statusMsg.textContent = "Morph compiled! Press play to test.";
+        } catch (err) {
+          statusMsg.style.color = "#f87171";
+          statusMsg.textContent = "Compilation Error: " + err.message;
+        }
+        btnCompile.textContent = "Compile Detailed Morph";
+        btnCompile.disabled = false;
+      }, 50);
+    }
+
+    btnCompile.addEventListener('click', compileMorph);
+
+    // ── Animation Runtime ───────────────────────────────────────────────────
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    function applyFrame(t) {
+      if(Object.keys(interpolators).length === 0) return;
+      
+      const clampT = Math.max(0, Math.min(1, t));
+      
+      for (const [color, interpFn] of Object.entries(interpolators)) {
+         const pathEl = morphSvg.querySelector(`path[data-color="${color}"]`);
+         if(pathEl) {
+             const result = interpFn(clampT);
+             pathEl.setAttribute('d', result.d);
+             pathEl.setAttribute('fill', result.fill);
+         }
+      }
+      
+      // Interpolate ViewBox
+      const vx = lerp(parsedA.viewBox[0], parsedB.viewBox[0], t);
+      const vy = lerp(parsedA.viewBox[1], parsedB.viewBox[1], t);
+      const vw = lerp(parsedA.viewBox[2], parsedB.viewBox[2], t);
+      const vh = lerp(parsedA.viewBox[3], parsedB.viewBox[3], t);
+      morphSvg.setAttribute('viewBox', `${vx} ${vy} ${vw} ${vh}`);
+    }
+
+    scrubber.addEventListener('input', (e) => {
+      if(isPlaying) togglePlay(); 
+      currentT = parseFloat(e.target.value);
+      applyFrame(currentT);
+    });
+
+    function tick(time) {
+      if (!lastTime) lastTime = time;
+      const dt = Math.min((time - lastTime) / 1000, 0.05);
+      lastTime = time;
+
+      const force = tension * (targetT - currentT) - friction * velocity;
+      velocity += force * dt;
+      currentT += velocity * dt;
+
+      scrubber.value = Math.max(0, Math.min(1, currentT));
+      applyFrame(currentT);
+
+      const isStabilized = Math.abs(targetT - currentT) < 0.001 && Math.abs(velocity) < 0.005;
+      
+      if (!isStabilized && isPlaying) {
+        rafId = requestAnimationFrame(tick);
+      } else {
+        isPlaying = false;
+        btnPlay.textContent = "▶";
+        currentT = targetT;
+        scrubber.value = targetT;
+        applyFrame(currentT);
+      }
+    }
+
+    function togglePlay() {
+      if(Object.keys(interpolators).length === 0) {
+        statusMsg.style.color = "#f87171";
+        statusMsg.textContent = "Upload files and compile first.";
+        return;
+      }
+      if (isPlaying) {
+        isPlaying = false;
+        btnPlay.textContent = "▶";
+        cancelAnimationFrame(rafId);
+      } else {
+        isPlaying = true;
+        btnPlay.textContent = "⏸";
+        targetT = currentT < 0.5 ? 1 : 0; 
+        lastTime = performance.now();
+        rafId = requestAnimationFrame(tick);
+      }
+    }
+
+    btnPlay.addEventListener('click', togglePlay);
+
+  </script>
+</body>
+</html>
